@@ -1,0 +1,1463 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Certificate Verification System</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #4361ee;
+            --secondary-color: #3f37c9;
+            --success-color: #4cc9f0;
+            --danger-color: #f72585;
+            --warning-color: #f77f00;
+            --light-color: #f8f9fa;
+            --dark-color: #212529;
+            --gray-color: #6c757d;
+            --border-radius: 8px;
+            --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f5f7fb;
+            color: var(--dark-color);
+            line-height: 1.6;
+            text-align: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            text-align: center;
+        }
+
+        /* Header Styles */
+        header {
+            background-color: white;
+            box-shadow: var(--box-shadow);
+            padding: 15px 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        header.visible {
+            display: block; /* Show when logged in */
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            text-align: left;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: var(--primary-color);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+        }
+
+        .logout-btn {
+            background: none;
+            border: none;
+            color: var(--gray-color);
+            cursor: pointer;
+            font-size: 1rem;
+            transition: var(--transition);
+        }
+
+        .logout-btn:hover {
+            color: var(--danger-color);
+        }
+
+        /* Page Styles */
+        .page {
+            display: none;
+            padding: 40px 0;
+            min-height: calc(100vh - 70px);
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        /* Landing Page Styles */
+        .landing-page {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 60px 0;
+        }
+
+        .landing-page h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            color: var(--dark-color);
+        }
+
+        .landing-page p {
+            font-size: 1.1rem;
+            color: var(--gray-color);
+            margin-bottom: 50px;
+        }
+
+        .options-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 30px;
+            width: 100%;
+            max-width: none;
+        }
+
+        .option-card {
+            background-color: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            padding: 40px 30px;
+            text-align: center;
+            cursor: pointer;
+            transition: var(--transition);
+            border: 2px solid transparent;
+        }
+
+        .option-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+            border-color: var(--primary-color);
+        }
+
+        .option-icon {
+            font-size: 3rem;
+            color: var(--primary-color);
+            margin-bottom: 20px;
+        }
+
+        .option-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: var(--dark-color);
+        }
+
+        .option-description {
+            color: var(--gray-color);
+            font-size: 0.95rem;
+        }
+
+        /* Login Page Styles */
+        .login-container {
+            max-width: 450px;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            padding: 40px;
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .login-header h2 {
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+            color: var(--dark-color);
+        }
+
+        .login-header p {
+            color: var(--gray-color);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--dark-color);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            transition: var(--transition);
+            text-align: left;
+        }
+
+        .form-control:focus {
+            border-color: var(--primary-color);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 12px 24px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+            text-align: center;
+        }
+
+        .btn:hover {
+            background-color: var(--secondary-color);
+        }
+
+        .btn-block {
+            display: block;
+            width: 100%;
+        }
+
+        .form-footer {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 0.9rem;
+            color: var(--gray-color);
+        }
+
+        .form-footer a {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .form-footer a:hover {
+            text-decoration: underline;
+        }
+
+        /* Upload Page Styles */
+        .upload-container {
+            background-color: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            padding: 40px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .upload-header {
+            margin-bottom: 30px;
+        }
+
+        .upload-header h2 {
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+            color: var(--dark-color);
+        }
+
+        .upload-header p {
+            color: var(--gray-color);
+        }
+
+        .upload-area {
+            border: 2px dashed #ddd;
+            border-radius: var(--border-radius);
+            padding: 60px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: var(--transition);
+            margin-bottom: 20px;
+        }
+
+        .upload-area.dragover {
+            border-color: var(--primary-color);
+            background-color: rgba(67, 97, 238, 0.05);
+        }
+
+        .upload-icon {
+            font-size: 3rem;
+            color: var(--primary-color);
+            margin-bottom: 20px;
+        }
+
+        .upload-text {
+            font-size: 1.1rem;
+            margin-bottom: 10px;
+            color: var(--dark-color);
+        }
+
+        .upload-subtext {
+            color: var(--gray-color);
+            font-size: 0.9rem;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .file-list {
+            margin-top: 20px;
+            text-align: left;
+        }
+
+        .file-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 15px;
+            background-color: var(--light-color);
+            border-radius: var(--border-radius);
+            margin-bottom: 10px;
+        }
+
+        .file-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .file-icon {
+            color: var(--primary-color);
+        }
+
+        .file-name {
+            font-weight: 500;
+        }
+
+        .file-size {
+            color: var(--gray-color);
+            font-size: 0.85rem;
+        }
+
+        .remove-file {
+            background: none;
+            border: none;
+            color: var(--danger-color);
+            cursor: pointer;
+            font-size: 1rem;
+        }
+
+        .upload-btn {
+            margin-top: 20px;
+        }
+
+        /* Verification Result Styles */
+        .verification-result {
+            margin-top: 30px;
+            padding: 20px;
+            border-radius: var(--border-radius);
+            text-align: center;
+            display: none;
+        }
+
+        .verification-result.success {
+            background-color: rgba(76, 201, 240, 0.1);
+            border: 1px solid var(--success-color);
+            color: var(--success-color);
+        }
+
+        .verification-result.error {
+            background-color: rgba(247, 37, 133, 0.1);
+            border: 1px solid var(--danger-color);
+            color: var(--danger-color);
+        }
+
+        .result-icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+        }
+
+        .result-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        /* Admin Dashboard Styles */
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .dashboard-header h2 {
+            font-size: 1.8rem;
+            color: var(--dark-color);
+        }
+
+        .dashboard-stats {
+            display: flex;
+            gap: 20px;
+        }
+
+        .stat-card {
+            background-color: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            padding: 20px;
+            min-width: 180px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+
+        .stat-label {
+            color: var(--gray-color);
+            font-size: 0.9rem;
+        }
+
+        .colleges-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .college-card {
+            background-color: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            padding: 25px;
+            cursor: pointer;
+            transition: var(--transition);
+            border-left: 4px solid transparent;
+            text-align: center;
+        }
+
+        .college-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .college-card.high-risk {
+            border-left-color: var(--danger-color);
+        }
+
+        .college-card.medium-risk {
+            border-left-color: var(--warning-color);
+        }
+
+        .college-card.low-risk {
+            border-left-color: var(--success-color);
+        }
+
+        .college-name {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: var(--dark-color);
+        }
+
+        .college-stats {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+
+        .stat-text {
+            color: var(--gray-color);
+            font-size: 0.85rem;
+        }
+
+        .risk-indicator {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            font-size: 0.9rem;
+        }
+
+        .risk-indicator.high {
+            color: var(--danger-color);
+        }
+
+        .risk-indicator.medium {
+            color: var(--warning-color);
+        }
+
+        .risk-indicator.low {
+            color: var(--success-color);
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background-color: white;
+            border-radius: var(--border-radius);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            width: 90%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            padding: 20px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--dark-color);
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: var(--gray-color);
+            cursor: pointer;
+        }
+
+        .modal-body {
+            padding: 20px;
+            text-align: center;
+        }
+
+        .case-list {
+            margin-top: 20px;
+            text-align: left;
+        }
+
+        .case-item {
+            padding: 15px;
+            border-radius: var(--border-radius);
+            background-color: var(--light-color);
+            margin-bottom: 15px;
+            text-align: left;
+        }
+
+        .case-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        .case-id {
+            font-weight: 600;
+            color: var(--dark-color);
+        }
+
+        .case-status {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .case-status.verified {
+            background-color: rgba(76, 201, 240, 0.1);
+            color: var(--success-color);
+        }
+
+        .case-status.forgery {
+            background-color: rgba(247, 37, 133, 0.1);
+            color: var(--danger-color);
+        }
+
+        .case-details {
+            color: var(--gray-color);
+            font-size: 0.9rem;
+        }
+
+        /* Notification Styles */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            background-color: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            transform: translateX(120%);
+            transition: transform 0.3s ease;
+            z-index: 1001;
+            max-width: 350px;
+            text-align: left;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        .notification.success {
+            border-left: 4px solid var(--success-color);
+        }
+
+        .notification.error {
+            border-left: 4px solid var(--danger-color);
+        }
+
+        .notification-icon {
+            font-size: 1.5rem;
+        }
+
+        .notification.success .notification-icon {
+            color: var(--success-color);
+        }
+
+        .notification.error .notification-icon {
+            color: var(--danger-color);
+        }
+
+        .notification-content {
+            flex: 1;
+        }
+
+        .notification-title {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .notification-message {
+            font-size: 0.9rem;
+            color: var(--gray-color);
+        }
+
+        .notification-close {
+            background: none;
+            border: none;
+            color: var(--gray-color);
+            cursor: pointer;
+        }
+
+        /* Responsive Styles */
+        @media (max-width: 768px) {
+            .options-container {
+                grid-template-columns: 1fr;
+            }
+
+            .dashboard-header {
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+            }
+
+            .dashboard-stats {
+                width: 100%;
+                justify-content: space-between;
+            }
+
+            .colleges-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header id="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <i class="fas fa-certificate"></i>
+                    <span>EduVerify</span>
+                </div>
+                <div class="user-info">
+                    <div class="user-avatar" id="userAvatar">U</div>
+                    <span id="userEmail">user@example.com</span>
+                    <button class="logout-btn" id="logoutBtn">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Landing Page -->
+    <div class="page landing-page active" id="landingPage">
+        <div class="container">
+            <h1>Certificate Verification System</h1>
+            <p>A secure platform for universities to upload certificates and for verification of their authenticity</p>
+            
+            <div class="options-container">
+                <div class="option-card" data-page="universityLogin">
+                    <div class="option-icon">
+                        <i class="fas fa-university"></i>
+                    </div>
+                    <h3 class="option-title">Universities & Colleges</h3>
+                    <p class="option-description">For uploading certificates and managing academic records</p>
+                </div>
+                
+                <div class="option-card" data-page="verificationLogin">
+                    <div class="option-icon">
+                        <i class="fas fa-search"></i>
+                    </div>
+                    <h3 class="option-title">Verification</h3>
+                    <p class="option-description">For verifying a certificate's authenticity</p>
+                </div>
+                
+                <div class="option-card" data-page="adminLogin">
+                    <div class="option-icon">
+                        <i class="fas fa-tachometer-alt"></i>
+                    </div>
+                    <h3 class="option-title">Admin Dashboard</h3>
+                    <p class="option-description">For administrators to monitor and manage the system</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- University Login Page -->
+    <div class="page" id="universityLogin">
+        <div class="container">
+            <div class="login-container">
+                <div class="login-header">
+                    <h2>University & College Login</h2>
+                    <p>Enter your credentials to access the upload portal</p>
+                </div>
+                
+                <form id="universityLoginForm">
+                    <div class="form-group">
+                        <label for="universityEmail">Email Address</label>
+                        <input type="email" class="form-control" id="universityEmail" placeholder="Enter your email" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="universityPassword">Password</label>
+                        <input type="password" class="form-control" id="universityPassword" placeholder="Enter your password" required>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-block">Login</button>
+                </form>
+                
+                <div class="form-footer">
+                    <p>Don't have an account? <a href="#" id="universitySignupLink">Sign Up</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Verification Login Page -->
+    <div class="page" id="verificationLogin">
+        <div class="container">
+            <div class="login-container">
+                <div class="login-header">
+                    <h2>Verification Login</h2>
+                    <p>Enter your credentials to access the verification portal</p>
+                </div>
+                
+                <form id="verificationLoginForm">
+                    <div class="form-group">
+                        <label for="verificationEmail">Email Address</label>
+                        <input type="email" class="form-control" id="verificationEmail" placeholder="Enter your email" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="verificationPassword">Password</label>
+                        <input type="password" class="form-control" id="verificationPassword" placeholder="Enter your password" required>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-block">Login</button>
+                </form>
+                
+                <div class="form-footer">
+                    <p>Don't have an account? <a href="#" id="verificationSignupLink">Sign Up</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Login Page -->
+    <div class="page" id="adminLogin">
+        <div class="container">
+            <div class="login-container">
+                <div class="login-header">
+                    <h2>Admin Login</h2>
+                    <p>Enter your credentials to access the admin dashboard</p>
+                </div>
+                
+                <form id="adminLoginForm">
+                    <div class="form-group">
+                        <label for="adminEmail">Email Address</label>
+                        <input type="email" class="form-control" id="adminEmail" placeholder="Enter your email" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="adminPassword">Password</label>
+                        <input type="password" class="form-control" id="adminPassword" placeholder="Enter your password" required>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-block">Login</button>
+                </form>
+                
+                <div class="form-footer">
+                    <p>Don't have an account? <a href="#" id="adminSignupLink">Sign Up</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- University Upload Page -->
+    <div class="page" id="universityUpload">
+        <div class="container">
+            <div class="upload-container">
+                <div class="upload-header">
+                    <h2>Bulk Certificate Upload</h2>
+                    <p>Upload multiple certificates at once using the drag-and-drop area below</p>
+                </div>
+                
+                <div class="upload-area" id="universityUploadArea">
+                    <div class="upload-icon">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                    </div>
+                    <div class="upload-text">Drag & drop files here</div>
+                    <div class="upload-subtext">or click to browse files (PDF, DOC, DOCX, JPG, PNG)</div>
+                    <input type="file" class="file-input" id="universityFileInput" multiple>
+                </div>
+                
+                <div class="file-list" id="universityFileList"></div>
+                
+                <button class="btn btn-block upload-btn" id="universityUploadBtn">Upload Certificates</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Verification Upload Page -->
+    <div class="page" id="verificationUpload">
+        <div class="container">
+            <div class="upload-container">
+                <div class="upload-header">
+                    <h2>Certificate Verification</h2>
+                    <p>Upload a certificate to verify its authenticity</p>
+                </div>
+                
+                <div class="upload-area" id="verificationUploadArea">
+                    <div class="upload-icon">
+                        <i class="fas fa-file-certificate"></i>
+                    </div>
+                    <div class="upload-text">Drag & drop a certificate file here</div>
+                    <div class="upload-subtext">or click to browse files (PDF, DOC, DOCX, JPG, PNG)</div>
+                    <input type="file" class="file-input" id="verificationFileInput">
+                </div>
+                
+                <div class="file-list" id="verificationFileList"></div>
+                
+                <button class="btn btn-block upload-btn" id="verificationUploadBtn">Verify Certificate</button>
+                
+                <div class="verification-result" id="verificationResult">
+                    <div class="result-icon"></div>
+                    <div class="result-title"></div>
+                    <div class="result-message"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Dashboard Page -->
+    <div class="page" id="adminDashboard">
+        <div class="container">
+            <div class="dashboard-header">
+                <h2>Admin Dashboard</h2>
+                <div class="dashboard-stats">
+                    <div class="stat-card">
+                        <div class="stat-value" id="totalColleges">12</div>
+                        <div class="stat-label">Total Colleges</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="totalCases">47</div>
+                        <div class="stat-label">Forgery Cases</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="verifiedCertificates">1,248</div>
+                        <div class="stat-label">Verified Certificates</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="colleges-grid" id="collegesGrid">
+                <!-- College cards will be dynamically generated here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- College Details Modal -->
+    <div class="modal" id="collegeModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="modalTitle">College Details</h3>
+                <button class="modal-close" id="modalClose">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div id="modalContent">
+                    <!-- Modal content will be dynamically generated here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification -->
+    <div class="notification" id="notification">
+        <div class="notification-icon">
+            <i class="fas fa-check-circle"></i>
+        </div>
+        <div class="notification-content">
+            <div class="notification-title">Success</div>
+            <div class="notification-message">Your action was completed successfully.</div>
+        </div>
+        <button class="notification-close" id="notificationClose">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+
+    <script>
+        // Jharkhand colleges data
+        const jharkhandColleges = [
+            { name: "Ranchi University", cases: 12, certificates: 245, risk: "high" },
+            { name: "Birla Institute of Technology, Mesra", cases: 3, certificates: 189, risk: "low" },
+            { name: "Indian School of Mines, Dhanbad", cases: 2, certificates: 156, risk: "low" },
+            { name: "Jamshedpur Co-operative College", cases: 8, certificates: 98, risk: "medium" },
+            { name: "St. Xavier's College, Ranchi", cases: 1, certificates: 134, risk: "low" },
+            { name: "Gossner College, Ranchi", cases: 5, certificates: 87, risk: "medium" },
+            { name: "Marwari College, Ranchi", cases: 7, certificates: 112, risk: "medium" },
+            { name: "Kerala Public School, Ranchi", cases: 4, certificates: 76, risk: "medium" },
+            { name: "Nirmala College, Ranchi", cases: 2, certificates: 65, risk: "low" },
+            { name: "Doranda College, Ranchi", cases: 3, certificates: 58, risk: "low" },
+            { name: "G.L. Bajaj Institute of Technology, Ranchi", cases: 0, certificates: 42, risk: "low" },
+            { name: "Cambridge School, Ranchi", cases: 0, certificates: 36, risk: "low" }
+        ];
+
+        // DOM elements
+        const pages = document.querySelectorAll('.page');
+        const header = document.getElementById('header');
+        const userAvatar = document.getElementById('userAvatar');
+        const userEmail = document.getElementById('userEmail');
+        const logoutBtn = document.getElementById('logoutBtn');
+        const notification = document.getElementById('notification');
+        const notificationClose = document.getElementById('notificationClose');
+        const modal = document.getElementById('collegeModal');
+        const modalClose = document.getElementById('modalClose');
+        const modalTitle = document.getElementById('modalTitle');
+        const modalContent = document.getElementById('modalContent');
+
+        // Current user state
+        let currentUser = null;
+        let currentPage = null;
+
+        // Initialize the application
+        function init() {
+            setupEventListeners();
+            renderCollegesGrid();
+        }
+
+        // Setup event listeners
+        function setupEventListeners() {
+            // Option cards
+            document.querySelectorAll('.option-card').forEach(card => {
+                card.addEventListener('click', () => {
+                    const targetPage = card.getAttribute('data-page');
+                    showPage(targetPage);
+                });
+            });
+
+            // Login forms
+            document.getElementById('universityLoginForm').addEventListener('submit', handleUniversityLogin);
+            document.getElementById('verificationLoginForm').addEventListener('submit', handleVerificationLogin);
+            document.getElementById('adminLoginForm').addEventListener('submit', handleAdminLogin);
+
+            // Signup links
+            document.getElementById('universitySignupLink').addEventListener('click', (e) => {
+                e.preventDefault();
+                showNotification('info', 'Sign Up', 'Sign up functionality would be implemented here.');
+            });
+            document.getElementById('verificationSignupLink').addEventListener('click', (e) => {
+                e.preventDefault();
+                showNotification('info', 'Sign Up', 'Sign up functionality would be implemented here.');
+            });
+            document.getElementById('adminSignupLink').addEventListener('click', (e) => {
+                e.preventDefault();
+                showNotification('info', 'Sign Up', 'Sign up functionality would be implemented here.');
+            });
+
+            // Logout button
+            logoutBtn.addEventListener('click', handleLogout);
+
+            // University upload
+            const universityUploadArea = document.getElementById('universityUploadArea');
+            const universityFileInput = document.getElementById('universityFileInput');
+            const universityFileList = document.getElementById('universityFileList');
+            const universityUploadBtn = document.getElementById('universityUploadBtn');
+
+            universityUploadArea.addEventListener('click', () => universityFileInput.click());
+            universityUploadArea.addEventListener('dragover', handleDragOver);
+            universityUploadArea.addEventListener('dragleave', handleDragLeave);
+            universityUploadArea.addEventListener('drop', (e) => handleDrop(e, universityFileInput, universityFileList));
+            universityFileInput.addEventListener('change', (e) => handleFileSelect(e, universityFileList));
+            universityUploadBtn.addEventListener('click', () => handleUniversityUpload(universityFileList));
+
+            // Verification upload
+            const verificationUploadArea = document.getElementById('verificationUploadArea');
+            const verificationFileInput = document.getElementById('verificationFileInput');
+            const verificationFileList = document.getElementById('verificationFileList');
+            const verificationUploadBtn = document.getElementById('verificationUploadBtn');
+            const verificationResult = document.getElementById('verificationResult');
+
+            verificationUploadArea.addEventListener('click', () => verificationFileInput.click());
+            verificationUploadArea.addEventListener('dragover', handleDragOver);
+            verificationUploadArea.addEventListener('dragleave', handleDragLeave);
+            verificationUploadArea.addEventListener('drop', (e) => handleDrop(e, verificationFileInput, verificationFileList, true));
+            verificationFileInput.addEventListener('change', (e) => handleFileSelect(e, verificationFileList, true));
+            verificationUploadBtn.addEventListener('click', () => handleVerificationUpload(verificationFileList, verificationResult));
+
+            // Modal
+            modalClose.addEventListener('click', closeModal);
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) closeModal();
+            });
+
+            // Notification
+            notificationClose.addEventListener('click', hideNotification);
+        }
+
+        // Show a specific page
+        function showPage(pageId) {
+            pages.forEach(page => page.classList.remove('active'));
+            document.getElementById(pageId).classList.add('active');
+            currentPage = pageId;
+        }
+
+        // Handle university login
+        function handleUniversityLogin(e) {
+            e.preventDefault();
+            const email = document.getElementById('universityEmail').value;
+            const password = document.getElementById('universityPassword').value;
+
+            if (email && password) {
+                currentUser = { email, role: 'university' };
+                updateUserInterface();
+                showPage('universityUpload');
+                showNotification('success', 'Login Successful', `Welcome, ${email}!`);
+            }
+        }
+
+        // Handle verification login
+        function handleVerificationLogin(e) {
+            e.preventDefault();
+            const email = document.getElementById('verificationEmail').value;
+            const password = document.getElementById('verificationPassword').value;
+
+            if (email && password) {
+                currentUser = { email, role: 'verification' };
+                updateUserInterface();
+                showPage('verificationUpload');
+                showNotification('success', 'Login Successful', `Welcome, ${email}!`);
+            }
+        }
+
+        // Handle admin login
+        function handleAdminLogin(e) {
+            e.preventDefault();
+            const email = document.getElementById('adminEmail').value;
+            const password = document.getElementById('adminPassword').value;
+
+            if (email && password) {
+                currentUser = { email, role: 'admin' };
+                updateUserInterface();
+                showPage('adminDashboard');
+                showNotification('success', 'Login Successful', `Welcome, ${email}!`);
+            }
+        }
+
+        // Update user interface after login
+        function updateUserInterface() {
+            if (currentUser) {
+                header.classList.add('visible');
+                userAvatar.textContent = currentUser.email.charAt(0).toUpperCase();
+                userEmail.textContent = currentUser.email;
+            } else {
+                header.classList.remove('visible');
+            }
+        }
+
+        // Handle logout
+        function handleLogout() {
+            currentUser = null;
+            updateUserInterface();
+            showPage('landingPage');
+            showNotification('success', 'Logged Out', 'You have been successfully logged out.');
+        }
+
+        // Drag and drop handlers
+        function handleDragOver(e) {
+            e.preventDefault();
+            e.currentTarget.classList.add('dragover');
+        }
+
+        function handleDragLeave(e) {
+            e.currentTarget.classList.remove('dragover');
+        }
+
+        function handleDrop(e, fileInput, fileList, singleFile = false) {
+            e.preventDefault();
+            e.currentTarget.classList.remove('dragover');
+            
+            const files = e.dataTransfer.files;
+            if (singleFile && files.length > 1) {
+                showNotification('error', 'Too Many Files', 'Please upload only one file at a time.');
+                return;
+            }
+            
+            fileInput.files = files;
+            displayFiles(files, fileList);
+        }
+
+        function handleFileSelect(e, fileList, singleFile = false) {
+            const files = e.target.files;
+            if (singleFile && files.length > 1) {
+                showNotification('error', 'Too Many Files', 'Please upload only one file at a time.');
+                return;
+            }
+            
+            displayFiles(files, fileList);
+        }
+
+        // Display selected files
+        function displayFiles(files, fileList) {
+            fileList.innerHTML = '';
+            
+            Array.from(files).forEach(file => {
+                const fileItem = document.createElement('div');
+                fileItem.className = 'file-item';
+                
+                const fileSize = formatFileSize(file.size);
+                const fileIcon = getFileIcon(file.name);
+                
+                fileItem.innerHTML = `
+                    <div class="file-info">
+                        <div class="file-icon">
+                            <i class="${fileIcon}"></i>
+                        </div>
+                        <div>
+                            <div class="file-name">${file.name}</div>
+                            <div class="file-size">${fileSize}</div>
+                        </div>
+                    </div>
+                    <button class="remove-file">
+                        <i class="fas fa-times"></i>
+                    </button>
+                `;
+                
+                const removeBtn = fileItem.querySelector('.remove-file');
+                removeBtn.addEventListener('click', () => {
+                    fileItem.remove();
+                });
+                
+                fileList.appendChild(fileItem);
+            });
+        }
+
+        // Format file size
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        // Get file icon based on file type
+        function getFileIcon(filename) {
+            const extension = filename.split('.').pop().toLowerCase();
+            
+            switch (extension) {
+                case 'pdf':
+                    return 'fas fa-file-pdf';
+                case 'doc':
+                case 'docx':
+                    return 'fas fa-file-word';
+                case 'jpg':
+                case 'jpeg':
+                case 'png':
+                    return 'fas fa-file-image';
+                default:
+                    return 'fas fa-file';
+            }
+        }
+
+        // Handle university upload
+        function handleUniversityUpload(fileList) {
+            const fileItems = fileList.querySelectorAll('.file-item');
+            
+            if (fileItems.length === 0) {
+                showNotification('error', 'No Files Selected', 'Please select at least one file to upload.');
+                return;
+            }
+            
+            // Simulate upload process
+            showNotification('success', 'Upload Started', 'Your files are being uploaded...');
+            
+            setTimeout(() => {
+                // Randomly determine success or failure
+                const isSuccess = Math.random() > 0.3; // 70% success rate
+                
+                if (isSuccess) {
+                    showNotification('success', 'Upload Successful', `${fileItems.length} certificates have been uploaded successfully.`);
+                    fileList.innerHTML = '';
+                } else {
+                    showNotification('error', 'Upload Failed', 'There was an error uploading your files. Please try again.');
+                }
+            }, 2000);
+        }
+
+        // Handle verification upload
+        function handleVerificationUpload(fileList, resultContainer) {
+            const fileItems = fileList.querySelectorAll('.file-item');
+            
+            if (fileItems.length === 0) {
+                showNotification('error', 'No File Selected', 'Please select a file to verify.');
+                return;
+            }
+            
+            if (fileItems.length > 1) {
+                showNotification('error', 'Too Many Files', 'Please select only one file to verify.');
+                return;
+            }
+            
+            // Simulate verification process
+            showNotification('success', 'Verification Started', 'Your certificate is being verified...');
+            
+            setTimeout(() => {
+                // Randomly determine valid or forgery
+                const isValid = Math.random() > 0.4; // 60% valid rate
+                
+                resultContainer.style.display = 'block';
+                
+                if (isValid) {
+                    resultContainer.className = 'verification-result success';
+                    resultContainer.innerHTML = `
+                        <div class="result-icon">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <div class="result-title">Certificate Valid</div>
+                        <div class="result-message">This certificate has been verified and is authentic.</div>
+                    `;
+                } else {
+                    resultContainer.className = 'verification-result error';
+                    resultContainer.innerHTML = `
+                        <div class="result-icon">
+                            <i class="fas fa-exclamation-circle"></i>
+                        </div>
+                        <div class="result-title">Forgery Detected</div>
+                        <div class="result-message">This certificate appears to be fraudulent or tampered with.</div>
+                    `;
+                }
+                
+                fileList.innerHTML = '';
+            }, 3000);
+        }
+
+        // Render colleges grid
+        function renderCollegesGrid() {
+            const collegesGrid = document.getElementById('collegesGrid');
+            collegesGrid.innerHTML = '';
+            
+            // Sort colleges by number of cases (descending)
+            const sortedColleges = [...jharkhandColleges].sort((a, b) => b.cases - a.cases);
+            
+            sortedColleges.forEach(college => {
+                const collegeCard = document.createElement('div');
+                collegeCard.className = `college-card ${college.risk}-risk`;
+                
+                collegeCard.innerHTML = `
+                    <div class="college-name">${college.name}</div>
+                    <div class="college-stats">
+                        <div class="stat-item">
+                            <div class="stat-number">${college.cases}</div>
+                            <div class="stat-text">Forgery Cases</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number">${college.certificates}</div>
+                            <div class="stat-text">Certificates</div>
+                        </div>
+                    </div>
+                    <div class="risk-indicator ${college.risk}">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <span>${college.risk.charAt(0).toUpperCase() + college.risk.slice(1)} Risk</span>
+                    </div>
+                `;
+                
+                collegeCard.addEventListener('click', () => showCollegeDetails(college));
+                collegesGrid.appendChild(collegeCard);
+            });
+        }
+
+        // Show college details modal
+        function showCollegeDetails(college) {
+            modalTitle.textContent = college.name;
+            
+            // Generate some sample forgery cases
+            const cases = [];
+            for (let i = 0; i < Math.min(college.cases, 5); i++) {
+                const isForgery = Math.random() > 0.3;
+                cases.push({
+                    id: `CASE-${college.name.substring(0, 3).toUpperCase()}-${1000 + i}`,
+                    status: isForgery ? 'forgery' : 'verified',
+                    date: new Date(Date.now() - Math.floor(Math.random() * 30) * 24 * 60 * 60 * 1000).toLocaleDateString(),
+                    details: isForgery 
+                        ? 'Certificate appears to have been tampered with. Signature does not match records.' 
+                        : 'Certificate verified successfully. All details match official records.'
+                });
+            }
+            
+            let casesHtml = '';
+            if (cases.length > 0) {
+                casesHtml = '<div class="case-list">';
+                cases.forEach(caseItem => {
+                    casesHtml += `
+                        <div class="case-item">
+                            <div class="case-header">
+                                <div class="case-id">${caseItem.id}</div>
+                                <div class="case-status ${caseItem.status}">${caseItem.status === 'forgery' ? 'Forgery Detected' : 'Verified'}</div>
+                            </div>
+                            <div class="case-details">
+                                <div>Date: ${caseItem.date}</div>
+                                <div>${caseItem.details}</div>
+                            </div>
+                        </div>
+                    `;
+                });
+                casesHtml += '</div>';
+            } else {
+                casesHtml = '<p>No forgery cases reported for this college.</p>';
+            }
+            
+            modalContent.innerHTML = `
+                <div class="college-details">
+                    <div class="college-stats" style="margin-bottom: 20px;">
+                        <div class="stat-item">
+                            <div class="stat-number">${college.cases}</div>
+                            <div class="stat-text">Forgery Cases</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number">${college.certificates}</div>
+                            <div class="stat-text">Certificates</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number">${Math.round((college.cases / college.certificates) * 100)}%</div>
+                            <div class="stat-text">Fraud Rate</div>
+                        </div>
+                    </div>
+                    <h3 style="margin-bottom: 15px;">Recent Cases</h3>
+                    ${casesHtml}
+                </div>
+            `;
+            
+            modal.classList.add('active');
+        }
+
+        // Close modal
+        function closeModal() {
+            modal.classList.remove('active');
+        }
+
+        // Show notification
+        function showNotification(type, title, message) {
+            const notificationTitle = notification.querySelector('.notification-title');
+            const notificationMessage = notification.querySelector('.notification-message');
+            const notificationIcon = notification.querySelector('.notification-icon');
+            
+            notification.className = `notification ${type}`;
+            notificationTitle.textContent = title;
+            notificationMessage.textContent = message;
+            
+            if (type === 'success') {
+                notificationIcon.innerHTML = '<i class="fas fa-check-circle"></i>';
+            } else if (type === 'error') {
+                notificationIcon.innerHTML = '<i class="fas fa-exclamation-circle"></i>';
+            } else if (type === 'info') {
+                notificationIcon.innerHTML = '<i class="fas fa-info-circle"></i>';
+            }
+            
+            notification.classList.add('show');
+            
+            // Auto hide after 5 seconds
+            setTimeout(hideNotification, 5000);
+        }
+
+        // Hide notification
+        function hideNotification() {
+            notification.classList.remove('show');
+        }
+
+        // Initialize the application when DOM is loaded
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
